@@ -657,7 +657,8 @@ if [[ "${install_type}" =~ ^(u|U)$ ]]; then
                  $HEIGHT $WIDTH "$(( 2 + ptcount))" ${partinfo})
 
     efi_partition="${partids[$esp]}"
-    mkfs.fat -F 32 "${efi_partition}"| dialog --progressbox 10 101
+    # don't format if it exists
+    # mkfs.fat -F 32 "${efi_partition}"| dialog --progressbox 10 101
 
     mkdir -p "${installdir}${esp_mountpoint}" "${installdir}/boot"
     mount "${efi_partition}" "${installdir}${esp_mountpoint}"
@@ -739,10 +740,12 @@ fi
     
 } 2> /dev/null | dialog --progressbox 30 101
 
+    printf "\n\n Enter _root_ password"
     chrun "passwd root"
     chrun "useradd -m -G wheel -s /bin/bash george"
     chrun "pacman -Sy --noconfirm sudo"
     grep -rl "# %wheel ALL=(ALL) ALL" /mnt/etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
+    printf "\n\n Enter _george_ password"
     chrun "passwd george"
     chrun "mkhomedir_helper george"
 

@@ -775,7 +775,7 @@ fi
 
     printf "Installing Xorg, XFCE, fonts, Intel microcode, NTFS.\n"
     chrun "pacman -Sy --noconfirm intel-ucode ntfs-3g pulseaudio pulseaudio-alsa pavucontrol hsetroot"
-    chrun "pacman -Sy --noconfirm xorg xterm xorg-drivers mc nano gvfs xar"
+    chrun "pacman -Sy --noconfirm xorg xterm xorg-drivers mc nano gvfs xarchiver udiskie udisks2"
 
     xorg_file="/mnt/etc/X11/xorg.conf.d/20-intel.conf"; printf "Section \"Device\"" > $xorg_file; 
     printf "\nIdentifier \"Intel Graphics\"" >> $xorg_file; printf "\nDriver \"intel\"" >> $xorg_file; 
@@ -824,8 +824,8 @@ chrun "chown george:george /home/george/.gtkrc-2.0-kde"
     cd trizen/; makepkg -si;
 EOF
 
-chown george:george /mnt/home/george/welcome.sh
-chmod +x /mnt/home/george/welcome.sh
+chrun "chown george:george /home/george/welcome.sh"
+chrun "chmod +x /home/george/welcome.sh"
 
 
 

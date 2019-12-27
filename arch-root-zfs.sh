@@ -747,6 +747,7 @@ fi
     
     rm -rf /mnt/etc/localtime
     ln -sf /mnt/usr/share/zoneinfo/Europe/London /mnt/etc/localtime
+    # arch-chroot /mnt /bin/bash -c "./arch-2.sh"
     # chroot "hwclock --systohc --utc"
     grep -rl "#en_GB.UTF-8 UTF-8" /etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
     echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf

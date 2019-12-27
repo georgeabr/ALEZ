@@ -731,6 +731,8 @@ fi
     else
         chrun "mkinitcpio -p linux"
     fi
+    echo "Enabling NetworkManager service, ffs!"
+    chrun "systemctl enable NetworkManager"
 } 2> /dev/null | dialog --progressbox 30 70
 
 unmount_cleanup
@@ -750,9 +752,6 @@ $(bootloader_message)
 
 # Enter chroot
 arch-chroot '${installdir}'
-
-# by me
-chrun "systemctl enable NetworkManager"
 
   # inside chroot
   pacman -S ....

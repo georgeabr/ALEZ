@@ -735,15 +735,16 @@ fi
     chrun "systemctl enable NetworkManager"
     echo "Enablish SSH access!"
     chrun "systemctl enable sshd"
+    
+    
+} 2> /dev/null | dialog --progressbox 30 101
+
     chrun "passwd root"
     chrun "useradd -m -G wheel -s /bin/bash george"
     chrun "pacman -Sy --noconfirm sudo"
     grep -rl "# %wheel ALL=(ALL) ALL" /mnt/etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
     chrun "passwd george"
     chrun "mkhomedir_helper george"
-    
-    
-} 2> /dev/null | dialog --progressbox 30 101
 
 unmount_cleanup
 

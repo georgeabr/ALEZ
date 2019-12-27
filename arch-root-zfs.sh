@@ -740,12 +740,31 @@ fi
     
 } 2> /dev/null | dialog --progressbox 30 101
 
-    printf "\n\n Enter _root_ password"
+    clear
+    
+    rm -rf /mnt/etc/localtime
+    ln -sf /mnt/usr/share/zoneinfo/Europe/London /mnt/etc/localtime
+    chroot "hwclock --systohc --utc"
+    grep -rl "#en_GB.UTF-8 UTF-8" /etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
+    echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf
+    chroot "export LANG=en_GB.UTF-8"
+    # localectl list-keymaps - use to list available keymaps
+    echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
+    chroot "locale-gen"
+    echo zed > /mnt/etc/hostname
+    
+    chroot "pacman -Sy --noconfirm pacman-contrib"
+    curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /mnt/etc/pacman.d/mirrorlist 
+    chroot "pacman -Sy --noconfirm base-devel"
+    
+    pacman_file="/mnt/etc/pacman.conf"; printf "\n\n# Enabling multilib." >> $pacman_file; printf "\n[multilib]" >> $pacman_file; printf "\nInclude = /etc/pacman.d/mirrorlist\n" >> $pacman_file
+    
+    printf "\n\n Enter _root_ password\n"
     chrun "passwd root"
     chrun "useradd -m -G wheel -s /bin/bash george"
     chrun "pacman -Sy --noconfirm sudo"
     grep -rl "# %wheel ALL=(ALL) ALL" /mnt/etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
-    printf "\n\n Enter _george_ password"
+    printf "\n\n Enter _george_ password\n"
     chrun "passwd george"
     chrun "mkhomedir_helper george"
 

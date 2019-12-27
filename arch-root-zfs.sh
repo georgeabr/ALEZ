@@ -794,7 +794,7 @@ printf "\nEnter ROOT user password:\n"
 chrun "passwd root"
 printf "\nAdding user _george_, sudo permission\n"
 chrun "useradd -m -G wheel -s /bin/bash george"
-grep -rl "# %wheel ALL=(ALL) ALL" /etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
+grep -rl "# %wheel ALL=(ALL) ALL" /mnt/etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
 printf "Enter password for user _george_\n"
 chrun "passwd george"
 chrun "mkhomedir_helper george"
@@ -806,13 +806,13 @@ printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.config/gtk-3.0/settings.ini
 # consistency for all GTK3 apps, including Firefox
 printf "gtk-cursor-theme-name = Adwaita" >> /mnt/home/george/.config/gtk-3.0/settings.ini
 printf "gtk-cursor-theme-size = 32" >> /mnt/home/george/.config/gtk-3.0/settings.ini
-chown george:george /mnt/home/george/.config/gtk-3.0/settings.ini
+chrun "chown george:george /home/george/.config/gtk-3.0/settings.ini"
 
 # for gtk2, including under kde
 printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.gtkrc-2.0
 printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.gtkrc-2.0-kde
-chown george:george /mnt/home/george/.gtkrc-2.0
-chown george:george /mnt/home/george/.gtkrc-2.0-kde
+chrun "chown george:george /home/george/.gtkrc-2.0"
+chrun "chown george:george /home/george/.gtkrc-2.0-kde"
 
     cat <<- EOF > "/mnt/home/george/welcome.sh"
     #!/bin/bash

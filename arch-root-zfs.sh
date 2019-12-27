@@ -237,16 +237,16 @@ get_matching_kernel() {
 refresh_mirrors() {
     pacman -Sy --noconfirm pacman-contrib &> /dev/null
 
-   #if hash reflector 2> /dev/null; then
-  #  {
+ if hash reflector 2> /dev/null; then
+   {
         echo "Refreshing mirrorlist"
 	echo "Please wait while ranking mirrors"
-	curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+#	curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 	# reflector is utterly FUCKED!
-       # reflector --verbose --latest 25 \
-       #           --sort rate --save /etc/pacman.d/mirrorlist || :
- #   } 2> /dev/null | dialog --progressbox 10 40
- # fi
+        reflector --verbose --latest 25 \
+                  --sort rate --save /etc/pacman.d/mirrorlist || :
+    } 2> /dev/null | dialog --progressbox 10 40
+  fi
 }
 
 install_arch(){

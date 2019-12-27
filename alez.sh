@@ -601,8 +601,8 @@ done
 {
     echo "Creating datasets..."
     zfs create -o mountpoint=none "${zroot}"/ROOT
-    zfs create -o mountpoint=none "${zroot}"/data
-    zfs create -o mountpoint=legacy "${zroot}"/data/home
+    # zfs create -o mountpoint=none "${zroot}"/data
+    # zfs create -o mountpoint=legacy "${zroot}"/data/home
 
     { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  &> /dev/null
 
@@ -628,7 +628,7 @@ done
     zpool import "$(zpool import | grep id: | awk '{print $2}')" -R "${installdir}" "${zroot}"
 
     mkdir -p "${installdir}/home"
-    mount -t zfs "${zroot}/data/home" "${installdir}/home"
+    # mount -t zfs "${zroot}/data/home" "${installdir}/home"
 
     if [[ "${bootloader}" =~ ^(g|G)$ ]]; then
         mkdir -p "${installdir}/boot/grub"

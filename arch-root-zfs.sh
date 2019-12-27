@@ -771,7 +771,7 @@ fi
     chrun "systemctl enable sshd.service"
     
     printf "Enabling multilib.\n"
-    pacman_file="/etc/pacman.conf"; printf "\n\n# Enabling multilib." >> $pacman_file; printf "\n[multilib]" >> $pacman_file; printf "\nInclude = /etc/pacman.d/mirrorlist\n" >> $pacman_file
+    pacman_file="/mnt/etc/pacman.conf"; printf "\n\n# Enabling multilib." >> $pacman_file; printf "\n[multilib]" >> $pacman_file; printf "\nInclude = /etc/pacman.d/mirrorlist\n" >> $pacman_file
 
     printf "Installing Xorg, XFCE, fonts, Intel microcode, NTFS.\n"
     chrun "pacman -Sy --noconfirm intel-ucode ntfs-3g pulseaudio pulseaudio-alsa pavucontrol hsetroot"

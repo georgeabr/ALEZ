@@ -297,7 +297,7 @@ install_arch(){
 }
 
 add_grub_entry(){
-    grep -rl " quiet" /etc/default/grub | xargs sed -i 's/ quiet/ quiet mitigations=off selinux=0 '\''acpi_osi=!Windows 2015'\''/g'
+    grep -rl " quiet" /mnt/etc/default/grub | xargs sed -i 's/ quiet/ quiet mitigations=off selinux=0 '\''acpi_osi=!Windows 2015'\''/g'
     chrun "grub-mkconfig -o /boot/grub/grub.cfg" "Create GRUB configuration"
     echo "Adding Arch ZFS entry to GRUB menu..."
     local kern_suffix
@@ -598,7 +598,7 @@ done
 {
     echo "Creating datasets..."
     zfs create -o mountpoint=none "${zroot}"/ROOT
-    zfs create -o canmount=off "${zroot}"/var
+    # zfs create -o canmount=off "${zroot}"/var
     # zfs create -o mountpoint=none "${zroot}"/data
     # zfs create -o mountpoint=legacy "${zroot}"/data/home
 
@@ -614,7 +614,9 @@ done
     zfs umount -a
 
     echo "Setting ZFS properties..."
-    zfs set atime=off "${zroot}"
+    zpool upgrade "${zroot}"
+    zfs set relatime=on "${zroot}"
+    zfs set xattr=sa "${zroot}"
     zfs set compression=on "${zroot}"
     zfs set acltype=posixacl "${zroot}"
     zpool set bootfs="${zroot}"/ROOT/default "${zroot}"

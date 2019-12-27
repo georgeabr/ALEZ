@@ -297,6 +297,7 @@ install_arch(){
 }
 
 add_grub_entry(){
+    grep -rl " quiet" /mnt/etc/default/grub | xargs sed -i 's/ quiet/ quiet mitigations=off selinux=0 '\''acpi_osi=!Windows 2015'\''/g'
     chrun "grub-mkconfig -o /boot/grub/grub.cfg" "Create GRUB configuration"
     echo "Adding Arch ZFS entry to GRUB menu..."
     local kern_suffix

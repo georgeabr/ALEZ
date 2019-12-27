@@ -33,7 +33,7 @@ show_path=false
 
 declare -a base_packages
 base_packages=(
-    'base' 'nano' 'linux-firmware' 'man-db' 'man-pages' 'networkmanager' 'mc' 'less' 'openssh' 'git'
+    'base' 'nano' 'linux-firmware' 'man-db' 'man-pages' 'networkmanager' 'mc' 'less' 'openssh' 'git' 'bc'
 )
 
 declare -a zpool_bios_features

@@ -24,7 +24,7 @@ archzfs_pgp_key="F75D9D76"
 zroot="zroot"
 
 repo_directory="/usr/local/share/ALEZ"
-repo_remote="danboid/ALEZ"
+repo_remote="georgeabr/ALEZ"
 
 HEIGHT=0
 WIDTH=0

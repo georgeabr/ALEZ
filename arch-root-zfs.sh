@@ -173,13 +173,13 @@ bios_partitioning(){
 
 uefi_partitioning(){
     echo -e "GPT UEFI partitioning ${1}...\n"
-    zap_partition "${1}" &>> /tmp/what-happened.txt
+    zap_partition "${1}"
 
     echo "Creating EFI partition"
-    sgdisk --new=1:1M:+"${2}"M --typecode=1:EF00 "${1}" &>> /tmp/what-happened.txt
+    sgdisk --new=1:1M:+"${2}"M --typecode=1:EF00 "${1}"
 
     echo "Creating system partition"
-    sgdisk --new=2:0:-"${free_space}"M --typecode=2:BF00 "${1}" &>> /tmp/what-happened.txt
+    sgdisk --new=2:0:-"${free_space}"M --typecode=2:BF00 "${1}"
 
 }
 
@@ -235,19 +235,15 @@ get_matching_kernel() {
 }
 
 refresh_mirrors() {
-    pacman -Sy --noconfirm pacman-contrib &> /dev/null
-    #echo "Refreshing mirrorlist"
-	echo "Please wait while ranking mirrors"
-	curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&country=FR&country=NL&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 10 - > /etc/pacman.d/mirrorlist
-	#echo "mirror ranking completed\n" >> /root/what-happened.txt
-    # if hash reflector 2> /dev/null; then
-   #{
+    pacman -Sy --noconfirm &> /dev/null
 
-	# reflector is utterly FUCKED!
-    #    reflector --verbose --latest 25 \
-    #              --sort rate --save /etc/pacman.d/mirrorlist || :
-    # } 2> /dev/null | dialog --progressbox 10 40
-#  fi
+    if hash reflector 2> /dev/null; then
+    {
+        echo "Refreshing mirrorlist"
+        reflector --verbose --latest 25 \
+                  --sort rate --save /etc/pacman.d/mirrorlist || :
+    } 2> /dev/null | dialog --progressbox ${HEIGHT} ${WIDTH}
+    fi
 }
 
 install_arch(){
@@ -255,9 +251,9 @@ install_arch(){
     {
         if [[ "${kernel_type}" =~ ^(l|L)$ ]]; then
             pacstrap "${installdir}" linux-lts-headers linux-lts \
-                                     "${base_packages[@]}" &>> /tmp/what-happened.txt
+                                     "${base_packages[@]}"
         else
-            pacstrap "${installdir}" linux-headers linux "${base_packages[@]}" &>> /tmp/what-happened.txt
+            pacstrap "${installdir}" linux-headers linux "${base_packages[@]}"
         fi
     } 2> /dev/null
 
@@ -301,20 +297,19 @@ install_arch(){
 }
 
 add_grub_entry(){
-    grep -rl " quiet" /mnt/etc/default/grub | xargs sed -i 's/ quiet/ quiet mitigations=off selinux=0 '\''acpi_osi=!Windows 2015'\''/g'
     chrun "grub-mkconfig -o /boot/grub/grub.cfg" "Create GRUB configuration"
-    # echo "Adding Arch ZFS entry to GRUB menu..."
+    echo "Adding Arch ZFS entry to GRUB menu..."
     local kern_suffix
     kern_suffix=""
     if [[ "${kernel_type}" =~ ^(l|L)$ ]]; then
         kern_suffix="-lts"
     fi
     # shellcheck disable=SC1004
-   # awk -i inplace '/10_linux/ && !x {print $0; print "\
-# menuentry \"Arch Linux ZFS\" {\n\
-#    \tlinux /ROOT/default/@/boot/vmlinuz-linux'"${kern_suffix}"' '"zfs=${zroot}/ROOT/default"' rw\n\
-#    \tinitrd /ROOT/default/@/boot/initramfs-linux'"${kern_suffix}"'.img\n\
-#}"; x=1; next} 1' "${installdir}/boot/grub/grub.cfg"
+    awk -i inplace '/10_linux/ && !x {print $0; print "\
+menuentry \"Arch Linux ZFS\" {\n\
+    \tlinux /ROOT/default/@/boot/vmlinuz-linux'"${kern_suffix}"' '"zfs=${zroot}/ROOT/default"' rw\n\
+    \tinitrd /ROOT/default/@/boot/initramfs-linux'"${kern_suffix}"'.img\n\
+}"; x=1; next} 1' "${installdir}/boot/grub/grub.cfg"
 }
 
 install_grub(){
@@ -576,14 +571,11 @@ while dialog --clear --title "New zpool?" --yesno "${msg}" $HEIGHT $WIDTH; do
                      --menu "${msg}" $HEIGHT $WIDTH "$(( 2 + ptcount))" ${partinfo})
         if [[ "${install_type}" =~ ^(b|B)$ ]]; then
             # shellcheck disable=SC2046
-            # zpool create -f -d -m none -o ashift=12 $(print_features) "${zroot}" "${partids[$zps]}"
-            zpool create -f -d -m none -o ashift=12 $(print_features) "${zroot}" "${partids[$zps]}" &>> /tmp/what-happened.txt
+            zpool create -f -d -m none -o ashift=12 $(print_features) "${zroot}" "${partids[$zps]}"
         else
-            zpool create -f -d -m none -o ashift=12 "${zroot}" "${partids[$zps]}" &>> /tmp/what-happened.txt
+            zpool create -f -d -m none -o ashift=12 "${zroot}" "${partids[$zps]}"
         fi
         dialog --title "Success" --msgbox "Created a single disk zpool with ${partids[$zps]}...." ${HEIGHT} ${WIDTH}
-            printf "single disk pool created\n" &>> /tmp/what-happened.txt
-
         break
     elif [ "$zpconf" == "m" ]; then
         # shellcheck disable=SC2086
@@ -598,9 +590,9 @@ while dialog --clear --title "New zpool?" --yesno "${msg}" $HEIGHT $WIDTH; do
             # shellcheck disable=SC2046
             zpool create "${zroot}" mirror -f -d -m none \
                 -o ashift=12 \
-                $(print_features) "${partids[$zp1]}" "${partids[$zp2]}" &>> /tmp/what-happened.txt
+                $(print_features) "${partids[$zp1]}" "${partids[$zp2]}"
         else
-            zpool create "${zroot}" mirror -f -d -m none -o ashift=12 "${partids[$zp1]}" "${partids[$zp2]}" &>> /tmp/what-happened.txt
+            zpool create "${zroot}" mirror -f -d -m none -o ashift=12 "${partids[$zp1]}" "${partids[$zp2]}"
         fi
         dialog --title "Success" --msgbox "Created a mirrored zpool with ${partids[$zp1]} ${partids[$zp2]}...." ${HEIGHT} ${WIDTH}
         break
@@ -609,57 +601,39 @@ done
 
 {
     echo "Creating datasets..."
-    # https://powersj.io/post/maas-curtin-zfsroot/
-    zpool upgrade "${zroot}" &>> /tmp/what-happened.txt
-    zfs create -o mountpoint=none "${zroot}"/ROOT &>> /tmp/what-happened.txt
+    zfs create -o mountpoint=none "${zroot}"/ROOT
     # zfs create -o mountpoint=none "${zroot}"/data
     # zfs create -o mountpoint=legacy "${zroot}"/data/home
-    zfs create -o canmount=off                 "${zroot}"/var &>> /tmp/what-happened.txt
-    zfs create -o canmount=off                 "${zroot}"/var/lib &>> /tmp/what-happened.txt
-    zfs create                                 "${zroot}"/var/log &>> /tmp/what-happened.txt
-    zfs create                                 "${zroot}"/var/spool &>> /tmp/what-happened.txt
-    zfs create -o canmount=off                 "${zroot}"/usr &>> /tmp/what-happened.txt
-    zfs create                                 "${zroot}"/usr/local &>> /tmp/what-happened.txt
-    zfs create                                 "${zroot}"/var/mail &>> /tmp/what-happened.txt
-    zfs create                                 "${zroot}"/var/lib/AccountsService &>> /tmp/what-happened.txt
-    printf "zfs create /var/log, etc\n" >> /tmp/what-happened.txt
 
-    { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  #&> /dev/null
+    { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  &> /dev/null
 
     # GRUB only datasets
     if [[ "${bootloader}" =~ ^(g|G)$ ]]; then
-        zfs create -o canmount=off "${zroot}"/boot &>> /tmp/what-happened.txt
-        zfs create -o mountpoint=legacy "${zroot}"/boot/grub &>> /tmp/what-happened.txt
+        zfs create -o canmount=off "${zroot}"/boot
+        zfs create -o mountpoint=legacy "${zroot}"/boot/grub
     fi
 
     # This umount is not always required but can prevent problems with the next command
-    zfs umount -a &>> /tmp/what-happened.txt
+    zfs umount -a
 
     echo "Setting ZFS properties..."
-    zfs set relatime=on "${zroot}" &>> /tmp/what-happened.txt
-    zfs set compression=lz4 "${zroot}" &>> /tmp/what-happened.txt
-    zfs set acltype=posixacl "${zroot}" &>> /tmp/what-happened.txt
-    zfs set canmount=off "${zroot}" &>> /tmp/what-happened.txt
-    zfs set xattr=sa "${zroot}" &>> /tmp/what-happened.txt
-    zfs set dnodesize=auto "${zroot}" &>> /tmp/what-happened.txt
-    # zfs set normalization=formD "${zroot}" &>> /tmp/what-happened.txt
-    zpool set bootfs="${zroot}"/ROOT/default "${zroot}" &>> /tmp/what-happened.txt
-    printf "did we set ZFS properties\n" >> /tmp/what-happened.txt
+    zfs set atime=off "${zroot}"
+    zfs set compression=on "${zroot}"
+    zfs set acltype=posixacl "${zroot}"
+    zpool set bootfs="${zroot}"/ROOT/default "${zroot}"
 
     check_mountdir
 
     echo "Exporting and importing pool..."
-    zpool export "${zroot}" &>> /tmp/what-happened.txt
-    zpool import "$(zpool import | grep id: | awk '{print $2}')" -R "${installdir}" "${zroot}" &>> /tmp/what-happened.txt
-    printf "did export and import pool\n" >> /tmp/what-happened.txt
-
+    zpool export "${zroot}"
+    zpool import "$(zpool import | grep id: | awk '{print $2}')" -R "${installdir}" "${zroot}"
 
     mkdir -p "${installdir}/home"
     # mount -t zfs "${zroot}/data/home" "${installdir}/home"
 
     if [[ "${bootloader}" =~ ^(g|G)$ ]]; then
-        mkdir -p "${installdir}/boot/grub" &>> /tmp/what-happened.txt
-        mount -t zfs "${zroot}/boot/grub" "${installdir}/boot/grub" &>> /tmp/what-happened.txt
+        mkdir -p "${installdir}/boot/grub"
+        mount -t zfs "${zroot}/boot/grub" "${installdir}/boot/grub"
     fi
 } | dialog --progressbox 10 101
 
@@ -684,14 +658,14 @@ if [[ "${install_type}" =~ ^(u|U)$ ]]; then
                  $HEIGHT $WIDTH "$(( 2 + ptcount))" ${partinfo})
 
     efi_partition="${partids[$esp]}"
-    mkfs.fat -F 32 "${efi_partition}" &>> /tmp/what-happened.txt| dialog --progressbox 10 101
+    mkfs.fat -F 32 "${efi_partition}"| dialog --progressbox 10 101
 
-    mkdir -p "${installdir}${esp_mountpoint}" "${installdir}/boot" &>> /tmp/what-happened.txt
-    mount "${efi_partition}" "${installdir}${esp_mountpoint}" &>> /tmp/what-happened.txt
+    mkdir -p "${installdir}${esp_mountpoint}" "${installdir}/boot"
+    mount "${efi_partition}" "${installdir}${esp_mountpoint}"
 
     if [[ "${bootloader}" =~ ^(s|S)$ ]]; then
-        mkdir -p "${installdir}${esp_mountpoint}/env/zedenv-default" &>> /tmp/what-happened.txt
-        mount --bind "${installdir}${esp_mountpoint}/env/zedenv-default" "${installdir}/boot" &>> /tmp/what-happened.txt
+        mkdir -p "${installdir}${esp_mountpoint}/env/zedenv-default"
+        mount --bind "${installdir}${esp_mountpoint}/env/zedenv-default" "${installdir}/boot"
     fi
 fi
 

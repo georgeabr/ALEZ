@@ -33,7 +33,7 @@ show_path=false
 
 declare -a base_packages
 base_packages=(
-    'base' 'nano' 'linux-firmware' 'man-db' 'man-pages' 'networkmanager' 'mc' 'less'
+    'base' 'nano' 'linux-firmware' 'man-db' 'man-pages' 'networkmanager' 'mc' 'less' 'openssh'
 )
 
 declare -a zpool_bios_features
@@ -733,6 +733,8 @@ fi
     fi
     echo "Enabling NetworkManager service, ffs!"
     chrun "systemctl enable NetworkManager"
+    echo "Enablish SSH access!"
+    chrun "systemctl enable sshd"
 } 2> /dev/null | dialog --progressbox 30 70
 
 unmount_cleanup

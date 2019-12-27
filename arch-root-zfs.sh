@@ -238,7 +238,7 @@ refresh_mirrors() {
     pacman -Sy --noconfirm pacman-contrib &> /dev/null
     #echo "Refreshing mirrorlist"
 	echo "Please wait while ranking mirrors"
-	#curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+	curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 	#echo "mirror ranking completed\n" >> /root/what-happened.txt
     # if hash reflector 2> /dev/null; then
    #{

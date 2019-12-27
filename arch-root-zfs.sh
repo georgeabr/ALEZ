@@ -485,8 +485,9 @@ kernel_type=$(dialog --stdout --clear --title "Kernel type" \
                      --menu "Please select:" $HEIGHT $WIDTH 4 "s" "Stable (standard)" "l" "Longterm")
 
 if [[ "${install_type}" =~ ^(u|U)$ ]]; then
-    bootloader=$(dialog --stdout --clear --title "UEFI bootloader" \
-                        --menu "Please select:" $HEIGHT $WIDTH 4 "s" "systemd-boot" "g" "GRUB on ZFS")
+    bootloader="g"
+#$(dialog --stdout --clear --title "UEFI bootloader" \
+#                        --menu "Please select:" $HEIGHT $WIDTH 4 "s" "systemd-boot" "g" "GRUB on ZFS")
 
     if [[ "${bootloader}" =~ ^(s|S)$ ]]; then
         esp_mountpoint="/mnt/efi"
@@ -527,11 +528,11 @@ while dialog "${aflags[@]}" "${autopart}" $HEIGHT $WIDTH; do
     if dialog --clear --title "Partition disk?" --yesno "${msg}" $HEIGHT $WIDTH; then
         msg="Shred partitions before partitioning $blkdev (slow)?"
         if dialog --clear --title "Shred disk?" --defaultno --yesno "${msg}" $HEIGHT $WIDTH; then
-            dialog --prgbox "shred --verbose -n1 $blkdev" 10 70
+            dialog --prgbox "shred --verbose -n1 $blkdev" 10 101
         fi
 
         if [[ "${install_type}" =~ ^(b|B)$ ]]; then
-            bios_partitioning "$blkdev" | dialog --programbox 10 70
+            bios_partitioning "$blkdev" | dialog --programbox 10 101
         else
             esp_size=512
             if [[ "${bootloader}" =~ ^(s|S) ]]; then
@@ -541,7 +542,7 @@ while dialog "${aflags[@]}" "${autopart}" $HEIGHT $WIDTH; do
                     esp_size=$(dialog --stdout --clear --title "UEFI partition size" --inputbox "${msg}" $HEIGHT $WIDTH "2048")
                 done
             fi
-            uefi_partitioning "$blkdev" "${esp_size}" | dialog --programbox 10 70
+            uefi_partitioning "$blkdev" "${esp_size}" | dialog --programbox 10 101
         fi
     fi
     autopart="Do you want to select another drive to be auto-partitioned?"
@@ -634,7 +635,7 @@ done
         mkdir -p "${installdir}/boot/grub"
         mount -t zfs "${zroot}/boot/grub" "${installdir}/boot/grub"
     fi
-} | dialog --progressbox 10 70
+} | dialog --progressbox 10 101
 
 if [[ "${install_type}" =~ ^(u|U)$ ]]; then
 
@@ -657,7 +658,7 @@ if [[ "${install_type}" =~ ^(u|U)$ ]]; then
                  $HEIGHT $WIDTH "$(( 2 + ptcount))" ${partinfo})
 
     efi_partition="${partids[$esp]}"
-    mkfs.fat -F 32 "${efi_partition}"| dialog --progressbox 10 70
+    mkfs.fat -F 32 "${efi_partition}"| dialog --progressbox 10 101
 
     mkdir -p "${installdir}${esp_mountpoint}" "${installdir}/boot"
     mount "${efi_partition}" "${installdir}${esp_mountpoint}"
@@ -678,12 +679,12 @@ if ! fetch_archzfs_key; then
     exit 1
 fi
 
-install_arch | dialog --progressbox 30 70
+install_arch | dialog --progressbox 30 101
 
 # Install GRUB BIOS
 if [[ "${install_type}" =~ ^(b|B)$ ]]; then
 
-    chrun "pacman -S --noconfirm grub os-prober" "Installing GRUB in chroot..." 2> /dev/null | dialog --progressbox 30 70
+    chrun "pacman -S --noconfirm grub os-prober" "Installing GRUB in chroot..." 2> /dev/null | dialog --progressbox 30 101
 
     add_grub_entry
 
@@ -709,7 +710,7 @@ if [[ "${install_type}" =~ ^(b|B)$ ]]; then
                  --menu "Enter the number of the partition on which you want to install GRUB:" \
                  ${HEIGHT} ${WIDTH} "${ptcount}" ${partinfo})
 
-        install_grub "${grubdisk}" | dialog --progressbox 30 70
+        install_grub "${grubdisk}" | dialog --progressbox 30 101
 
         autopart="Do you want to select another drive to install GRUB onto?"
         declare -a aflags=(--clear --title 'Install GRUB' --defaultno --yesno)
@@ -721,7 +722,7 @@ else
         else
             install_grub_efi "${esp_mountpoint}"
         fi
-    } 2> /dev/null | dialog --progressbox 30 70
+    } 2> /dev/null | dialog --progressbox 30 101
 fi
 
 {
@@ -735,7 +736,7 @@ fi
     chrun "systemctl enable NetworkManager"
     echo "Enablish SSH access!"
     chrun "systemctl enable sshd"
-} 2> /dev/null | dialog --progressbox 30 70
+} 2> /dev/null | dialog --progressbox 30 101
 
 unmount_cleanup
 

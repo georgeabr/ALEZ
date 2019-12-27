@@ -572,6 +572,7 @@ while dialog --clear --title "New zpool?" --yesno "${msg}" $HEIGHT $WIDTH; do
                      --menu "${msg}" $HEIGHT $WIDTH "$(( 2 + ptcount))" ${partinfo})
         if [[ "${install_type}" =~ ^(b|B)$ ]]; then
             # shellcheck disable=SC2046
+            # zpool create -f -d -m none -o ashift=12 $(print_features) "${zroot}" "${partids[$zps]}"
             zpool create -f -d -m none -o ashift=12 $(print_features) "${zroot}" "${partids[$zps]}"
         else
             zpool create -f -d -m none -o ashift=12 "${zroot}" "${partids[$zps]}"
@@ -605,6 +606,15 @@ done
     zfs create -o mountpoint=none "${zroot}"/ROOT
     # zfs create -o mountpoint=none "${zroot}"/data
     # zfs create -o mountpoint=legacy "${zroot}"/data/home
+    zfs create -o canmount=off                 "${zroot}"/var
+    zfs create -o canmount=off                 "${zroot}"/var/lib
+    zfs create                                 "${zroot}"/var/log
+    zfs create                                 "${zroot}"/var/spool
+    zfs create -o canmount=off                 "${zroot}"/usr
+    zfs create                                 "${zroot}"/usr/local
+    zfs create                                 "${zroot}"/var/mail
+    zfs create                                 "${zroot}"/var/lib/AccountsService
+
 
     { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  &> /dev/null
 
@@ -618,9 +628,13 @@ done
     zfs umount -a
 
     echo "Setting ZFS properties..."
-    zfs set atime=off "${zroot}"
-    zfs set compression=on "${zroot}"
+    zfs set relatime=on "${zroot}"
+    zfs set compression=lz4 "${zroot}"
     zfs set acltype=posixacl "${zroot}"
+    zfs set canmount=off "${zroot}"
+    zfs set xattr=sa "${zroot}"
+    zfs set dnodesize=auto "${zroot}"
+    zfs set normalization=formD "${zroot}"
     zpool set bootfs="${zroot}"/ROOT/default "${zroot}"
 
     check_mountdir

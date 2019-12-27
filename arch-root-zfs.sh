@@ -750,7 +750,7 @@ fi
     # chroot "hwclock --systohc --utc"
     grep -rl "#en_GB.UTF-8 UTF-8" /etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
     echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf
-    chroot "export LANG=en_GB.UTF-8"
+    # chroot "export LANG=en_GB.UTF-8"
     # localectl list-keymaps - use to list available keymaps
     echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
     chroot "locale-gen"

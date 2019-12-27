@@ -299,18 +299,18 @@ install_arch(){
 add_grub_entry(){
     grep -rl " quiet" /mnt/etc/default/grub | xargs sed -i 's/ quiet/ quiet mitigations=off selinux=0 '\''acpi_osi=!Windows 2015'\''/g'
     chrun "grub-mkconfig -o /boot/grub/grub.cfg" "Create GRUB configuration"
-    echo "Adding Arch ZFS entry to GRUB menu..."
+    # echo "Adding Arch ZFS entry to GRUB menu..."
     local kern_suffix
     kern_suffix=""
     if [[ "${kernel_type}" =~ ^(l|L)$ ]]; then
         kern_suffix="-lts"
     fi
     # shellcheck disable=SC1004
-    awk -i inplace '/10_linux/ && !x {print $0; print "\
-menuentry \"Arch Linux ZFS\" {\n\
-    \tlinux /ROOT/default/@/boot/vmlinuz-linux'"${kern_suffix}"' '"zfs=${zroot}/ROOT/default"' rw\n\
-    \tinitrd /ROOT/default/@/boot/initramfs-linux'"${kern_suffix}"'.img\n\
-}"; x=1; next} 1' "${installdir}/boot/grub/grub.cfg"
+   # awk -i inplace '/10_linux/ && !x {print $0; print "\
+# menuentry \"Arch Linux ZFS\" {\n\
+#    \tlinux /ROOT/default/@/boot/vmlinuz-linux'"${kern_suffix}"' '"zfs=${zroot}/ROOT/default"' rw\n\
+#    \tinitrd /ROOT/default/@/boot/initramfs-linux'"${kern_suffix}"'.img\n\
+#}"; x=1; next} 1' "${installdir}/boot/grub/grub.cfg"
 }
 
 install_grub(){

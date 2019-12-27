@@ -752,11 +752,12 @@ fi
     chrun "rm -rf /etc/localtime"
     chrun "ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime"
     chrun "hwclock --systohc --utc"
+    chrun "timedatectl set-ntp true"
     grep -rl "#en_GB.UTF-8 UTF-8" /mnt/etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
     echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf
     chrun "export LANG=en_GB.UTF-8"
-# localectl list-keymaps - use to list available keymaps
-echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
+    # localectl list-keymaps - use to list available keymaps
+    echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
     chrun "locale-gen"
 
     printf "Configuring hostname\n."

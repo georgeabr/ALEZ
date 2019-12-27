@@ -792,10 +792,10 @@ clear
 
 printf "\nEnter ROOT user password:\n"
 chrun "passwd root"
-printf "\nAdding user _george_, sudo permission\n"
+#printf "\nAdding user _george_, sudo permission\n"
 chrun "useradd -m -G wheel -s /bin/bash george"
 grep -rl "# %wheel ALL=(ALL) ALL" /mnt/etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
-printf "Enter password for user _george_\n"
+printf "\n\nEnter password for user _george_\n"
 chrun "passwd george"
 chrun "mkhomedir_helper george"
 

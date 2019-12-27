@@ -24,7 +24,7 @@ archzfs_pgp_key="F75D9D76"
 zroot="zroot"
 
 repo_directory="/usr/local/share/arch-root-zfs"
-repo_remote="georgeabr/arch-root-zfs
+repo_remote="georgeabr/arch-root-zfs"
 
 HEIGHT=0
 WIDTH=0

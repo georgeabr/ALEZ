@@ -245,7 +245,7 @@ refresh_mirrors() {
         # reflector --verbose --latest 25 \
         #          --sort rate --save /etc/pacman.d/mirrorlist || :
     } 2> /dev/null | dialog --progressbox 10 40
-    fi
+    #fi
 }
 
 install_arch(){

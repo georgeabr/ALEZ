@@ -602,6 +602,7 @@ done
 {
     echo "Creating datasets..."
     zfs create -o mountpoint=none "${zroot}"/ROOT
+    zfs create -o canmount=off "${zroot}"/var
     # zfs create -o mountpoint=none "${zroot}"/data
     # zfs create -o mountpoint=legacy "${zroot}"/data/home
 

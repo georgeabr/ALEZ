@@ -763,3 +763,4 @@ arch-chroot '${installdir}'
 umount -R '${installdir}'
 zfs umount -a && zpool export '${zroot}'
 EOT
+

@@ -745,11 +745,25 @@ fi
 
     clear
     
-    chroot "pacman -Sy --noconfirm pacman-contrib"
+    chrun "pacman -Sy --noconfirm pacman-contrib"
     curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /mnt/etc/pacman.d/mirrorlist 
-    chroot "pacman -Sy --noconfirm base-devel"
+    chrun "pacman -Sy --noconfirm base-devel"
 
-    curl https://raw.githubusercontent.com/georgeabr/arch/master/arch-2.sh > arch-2.sh; chmod +x arch-2.sh; cp ./arch-2.sh /mnt; arch-chroot /mnt /bin/bash -c "./arch-2.sh"
+    chrun "rm -rf /etc/localtime"
+    chrun "ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime"
+    chrun "hwclock --systohc --utc"
+    grep -rl "#en_GB.UTF-8 UTF-8" /mnt/etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
+    echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf
+    chrun "export LANG=en_GB.UTF-8"
+# localectl list-keymaps - use to list available keymaps
+echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
+    chrun "locale-gen"
+
+    printf "Configuring hostname\n."
+    echo archie > /mnt/etc/hostname
+
+
+    # curl https://raw.githubusercontent.com/georgeabr/arch/master/arch-2.sh > arch-2.sh; chmod +x arch-2.sh; cp ./arch-2.sh /mnt; arch-chroot /mnt /bin/bash -c "./arch-2.sh"
         
       
 unmount_cleanup

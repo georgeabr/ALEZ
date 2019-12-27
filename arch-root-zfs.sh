@@ -609,6 +609,7 @@ done
 
 {
     echo "Creating datasets..."
+    zpool upgrade "${zroot}" &>> /tmp/what-happened.txt
     zfs create -o mountpoint=none "${zroot}"/ROOT &>> /tmp/what-happened.txt
     # zfs create -o mountpoint=none "${zroot}"/data
     # zfs create -o mountpoint=legacy "${zroot}"/data/home

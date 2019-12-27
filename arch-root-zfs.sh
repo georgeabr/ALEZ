@@ -618,7 +618,7 @@ done
     zfs create                                 "${zroot}"/usr/local
     zfs create                                 "${zroot}"/var/mail
     zfs create                                 "${zroot}"/var/lib/AccountsService
-
+    read -p "zfs create /var/log, etc"
 
     { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  #&> /dev/null
 
@@ -640,12 +640,15 @@ done
     zfs set dnodesize=auto "${zroot}"
     zfs set normalization=formD "${zroot}"
     zpool set bootfs="${zroot}"/ROOT/default "${zroot}"
+    read -p "did we set ZFS properties"
 
     check_mountdir
 
     echo "Exporting and importing pool..."
     zpool export "${zroot}"
     zpool import "$(zpool import | grep id: | awk '{print $2}')" -R "${installdir}" "${zroot}"
+    read -p "did export and import pool"
+
 
     mkdir -p "${installdir}/home"
     # mount -t zfs "${zroot}/data/home" "${installdir}/home"

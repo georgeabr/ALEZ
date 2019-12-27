@@ -582,6 +582,8 @@ while dialog --clear --title "New zpool?" --yesno "${msg}" $HEIGHT $WIDTH; do
             zpool create -f -d -m none -o ashift=12 "${zroot}" "${partids[$zps]}"
         fi
         dialog --title "Success" --msgbox "Created a single disk zpool with ${partids[$zps]}...." ${HEIGHT} ${WIDTH}
+            printf "single disk pool created\n" > /tmp/what-happened.txt
+
         break
     elif [ "$zpconf" == "m" ]; then
         # shellcheck disable=SC2086
@@ -618,7 +620,7 @@ done
     zfs create                                 "${zroot}"/usr/local
     zfs create                                 "${zroot}"/var/mail
     zfs create                                 "${zroot}"/var/lib/AccountsService
-    read -p "zfs create /var/log, etc"
+    printf "zfs create /var/log, etc\n" >> /tmp/what-happened.txt
 
     { zfs create -o mountpoint=/ "${zroot}"/ROOT/default || : ; }  #&> /dev/null
 
@@ -640,14 +642,14 @@ done
     zfs set dnodesize=auto "${zroot}"
     zfs set normalization=formD "${zroot}"
     zpool set bootfs="${zroot}"/ROOT/default "${zroot}"
-    read -p "did we set ZFS properties"
+    printf "did we set ZFS properties\n" >> /tmp/what-happened.txt
 
     check_mountdir
 
     echo "Exporting and importing pool..."
     zpool export "${zroot}"
     zpool import "$(zpool import | grep id: | awk '{print $2}')" -R "${installdir}" "${zroot}"
-    read -p "did export and import pool"
+    printf "did export and import pool\n" >> /tmp/what-happened.txt
 
 
     mkdir -p "${installdir}/home"

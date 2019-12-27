@@ -752,7 +752,7 @@ $(bootloader_message)
 arch-chroot '${installdir}'
 
 # by me
-systemctl enable NetworkManager
+chrun "systemctl enable NetworkManager"
 
   # inside chroot
   pacman -S ....

@@ -751,6 +751,9 @@ $(bootloader_message)
 # Enter chroot
 arch-chroot '${installdir}'
 
+# by me
+systemctl enable NetworkManager
+
   # inside chroot
   pacman -S ....
   exit

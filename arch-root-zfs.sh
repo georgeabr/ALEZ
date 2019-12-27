@@ -743,7 +743,8 @@ fi
     
 } 2> /dev/null | dialog --progressbox 30 101
 
-    clear
+{
+    # clear
     
     chrun "pacman -Sy --noconfirm pacman-contrib"
     curl -s "https://www.archlinux.org/mirrorlist/?&country=GB&protocol=http&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /mnt/etc/pacman.d/mirrorlist 
@@ -751,8 +752,10 @@ fi
 
     chrun "rm -rf /etc/localtime"
     chrun "ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime"
-    chrun "hwclock --systohc --utc"
-    chrun "timedatectl set-ntp true"
+    # time sync in chroot does not work, so these two commands are useless
+    # chrun "hwclock --systohc --utc"
+    # chrun "timedatectl set-ntp true"
+    
     grep -rl "#en_GB.UTF-8 UTF-8" /mnt/etc/locale.gen | xargs sed -i 's/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/g'
     echo LANG=en_GB.UTF-8 > /mnt/etc/locale.conf
     chrun "export LANG=en_GB.UTF-8"
@@ -760,8 +763,70 @@ fi
     echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
     chrun "locale-gen"
 
-    printf "Configuring hostname\n."
-    echo archie > /mnt/etc/hostname
+    printf "Configuring hostname\n"
+    echo zed > /mnt/etc/hostname
+
+    printf "Enabling SSH.\n"
+    chrun "pacman -Sy --noconfirm openssh"
+    chrun "systemctl enable sshd.service"
+    
+    printf "Enabling multilib.\n"
+    pacman_file="/etc/pacman.conf"; printf "\n\n# Enabling multilib." >> $pacman_file; printf "\n[multilib]" >> $pacman_file; printf "\nInclude = /etc/pacman.d/mirrorlist\n" >> $pacman_file
+
+    printf "Installing Xorg, XFCE, fonts, Intel microcode, NTFS.\n"
+    chrun "pacman -Sy --noconfirm intel-ucode ntfs-3g pulseaudio pulseaudio-alsa pavucontrol hsetroot"
+    chrun "pacman -Sy --noconfirm xorg xterm xorg-drivers mc nano gvfs xar"
+
+    xorg_file="/mnt/etc/X11/xorg.conf.d/20-intel.conf"; printf "Section \"Device\"" > $xorg_file; 
+    printf "\nIdentifier \"Intel Graphics\"" >> $xorg_file; printf "\nDriver \"intel\"" >> $xorg_file; 
+    printf "\nOption \"TearFree\" \"true\"" >> $xorg_file; printf "\nEndSection" >> $xorg_file;
+ 
+    chrun "pacman -Sy --noconfirm xfce4 xfce4-goodies sddm mousepad ttf-dejavu ttf-bitstream-vera ttf-liberation noto-fonts redshift gnupg"
+    chrun "pacman -Sy --noconfirm git networkmanager networkmanager-openvpn nm-connection-editor network-manager-applet wget firefox unzip unrar"
+    chrun "systemctl enable sddm.service"
+    chrun "systemctl enable NetworkManager"
+ 
+} 2> /dev/null | dialog --progressbox 30 101  
+
+clear
+
+printf "\nEnter ROOT user password:\n"
+chrun "passwd root"
+printf "\nAdding user _george_, sudo permission\n"
+chrun "useradd -m -G wheel -s /bin/bash george"
+grep -rl "# %wheel ALL=(ALL) ALL" /etc/sudoers | xargs sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g'
+printf "Enter password for user _george_\n"
+chrun "passwd george"
+chrun "mkhomedir_helper george"
+
+chrun "mkdir /home/george/.config; chown george:george /home/george/.config"
+chrun "mkdir /home/george/.config/gtk-3.0; chown george:george /home/george/.config/gtk-3.0"
+printf "[Settings]" > /mnt/home/george/.config/gtk-3.0/settings.ini
+printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.config/gtk-3.0/settings.ini
+# consistency for all GTK3 apps, including Firefox
+printf "gtk-cursor-theme-name = Adwaita" >> /mnt/home/george/.config/gtk-3.0/settings.ini
+printf "gtk-cursor-theme-size = 32" >> /mnt/home/george/.config/gtk-3.0/settings.ini
+chown george:george /mnt/home/george/.config/gtk-3.0/settings.ini
+
+# for gtk2, including under kde
+printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.gtkrc-2.0
+printf "\ngtk-cursor-blink = 0" >> /mnt/home/george/.gtkrc-2.0-kde
+chown george:george /mnt/home/george/.gtkrc-2.0
+chown george:george /mnt/home/george/.gtkrc-2.0-kde
+
+    cat <<- EOF > "/mnt/home/george/welcome.sh"
+    #!/bin/bash
+    timedatectl set-ntp true
+    timedatectl
+    # works from X11, I guess
+    localectl set-x11-keymap gb pc105
+    git clone https://aur.archlinux.org/trizen.git
+    cd trizen/; makepkg -si;
+EOF
+
+chown george:george /mnt/home/george/welcome.sh
+chmod +x /mnt/home/george/welcome.sh
+
 
 
     # curl https://raw.githubusercontent.com/georgeabr/arch/master/arch-2.sh > arch-2.sh; chmod +x arch-2.sh; cp ./arch-2.sh /mnt; arch-chroot /mnt /bin/bash -c "./arch-2.sh"
